@@ -1,0 +1,47 @@
+# Node.js dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# npm package-lock and yarn lock files
+package-lock.json
+yarn.lock
+
+# Miscellaneous
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Mac specific files
+*.DS_Store
+
+# Windows specific files
+*.log
+*.class
+*.apk
+*.jar
+*.war
+
+# Coverage directory used by tools like Istanbul
+coverage/
