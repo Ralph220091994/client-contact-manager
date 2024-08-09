@@ -11,12 +11,12 @@ const CreateClient = ({ onClientCreated }) => {
         e.preventDefault();
         try {
             await axios.post('http://localhost:5000/clients', { name });
-            setMessage(`Client created`);
+            setMessage('Client created successfully.');
             setName(''); // Reset the input field
             onClientCreated(); // Notify parent component of the new client
         } catch (error) {
-            setMessage('Error creating client');
-            console.error(error);
+            setMessage('Error creating client.');
+            console.error('Error:', error);
         }
     };
 
@@ -44,14 +44,22 @@ const CreateClient = ({ onClientCreated }) => {
 const ClientList = ({ onClientCreated }) => {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const fetchClients = async () => {
         try {
             const response = await axios.get('http://localhost:5000/clients');
-            setClients(response.data);
+            if (response.data.length === 0) {
+                setClients([]); // Set clients to an empty array if no clients are found
+                setError(''); // No error, just no clients
+            } else {
+                setClients(response.data);
+            }
             setLoading(false);
         } catch (error) {
-            console.error("There was an error fetching the clients!", error);
+            setError('Error fetching clients.');
+            setLoading(false);
+            console.error('Error:', error);
         }
     };
 
@@ -70,12 +78,17 @@ const ClientList = ({ onClientCreated }) => {
                 client._id === clientId ? { ...client, isSaved: true } : client
             ));
         } catch (error) {
-            console.error('Error saving client', error);
+            setError('Error saving client.');
+            console.error('Error:', error);
         }
     };
 
     if (loading) {
         return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>{error}</div>;
     }
 
     if (clients.length === 0) {
@@ -116,6 +129,7 @@ const ClientList = ({ onClientCreated }) => {
         </div>
     );
 };
+
 
 // Main Component
 const ClientManagement = () => {

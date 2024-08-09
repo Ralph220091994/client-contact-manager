@@ -9,7 +9,7 @@ const CreateContact = ({ onContactCreated }) => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
 
-    //javascript email validation 
+    // JavaScript email validation
     const validateEmail = (email) => {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailPattern.test(email);
@@ -74,7 +74,6 @@ const CreateContact = ({ onContactCreated }) => {
     );
 };
 
-
 // Component for displaying the list of contacts
 const ContactList = () => {
     const [contacts, setContacts] = useState([]);
@@ -83,10 +82,11 @@ const ContactList = () => {
     const fetchContacts = async () => {
         try {
             const response = await axios.get('http://localhost:5000/contacts');
-            setContacts(response.data);
-            setLoading(false);
+            setContacts(response.data || []); // Ensure contacts is an empty array if no data
+            setLoading(false); // Set loading to false after data is fetched
         } catch (error) {
             console.error("There was an error fetching the contacts!", error);
+            setLoading(false); // Also set loading to false if there's an error
         }
     };
 

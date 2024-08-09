@@ -9,13 +9,14 @@ router.get('/', async (req, res) => {
     try {
         const clients = await Client.find().populate('contacts').sort({ name: 1 });
         if (clients.length === 0) {
-            return res.status(404).send("No client(s) found.");
+            return res.status(200).json([]); // Return an empty array with a 200 status
         }
         res.json(clients);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
+
 
 // Create a new client
 router.post('/', async (req, res) => {
@@ -31,21 +32,50 @@ router.post('/', async (req, res) => {
     }
 });
 
-//function to generate client code
 async function generateClientCode(name) {
-    let prefix;
-    
-    const words = name.split(' ');
-    if (words.length === 1) {
-        // Use the first three letters if the name is a single word
-        prefix = name.substring(0, 3).toUpperCase();
-    } else {
-        // Use the first letter of each word
-        prefix = words.map(word => word[0].toUpperCase()).join('');
-    }
-    
-    let counter = await Counter.findOne({ name: 'client_code' });
+    let prefix = '';
 
+    const words = name.split(' ');
+
+    if (words.length === 1) {
+        // If it's a single word, take the first three letters
+        prefix = name.substring(0, 3).toUpperCase();
+    } else if (words.length === 2) {
+        const firstLetter = words[0][0].toUpperCase();
+        
+        // Determine which word is longer
+        const longerWord = words[0].length >= words[1].length ? words[0] : words[1];
+        const middleLetterIndex = Math.floor(longerWord.length / 2);
+        const middleLetter = longerWord[middleLetterIndex].toUpperCase();
+        
+        const lastLetter = words[1][0].toUpperCase();
+        
+        prefix = firstLetter + middleLetter + lastLetter;
+    } else if (words.length === 3) {
+        // If there are three words, take the first letter of the first three words
+        prefix = words.slice(0, 3).map(word => word[0].toUpperCase()).join('');
+    } else {
+        // If there are four or more words
+        const firstLetter = words[0][0].toUpperCase();
+
+        // Calculate the middle word index
+        const middleIndex = Math.ceil(words.length / 2) - 1; // Adjusted for zero-based index
+        const middleLetter = words[middleIndex][0].toUpperCase();
+
+        const lastLetter = words[words.length - 1][0].toUpperCase();
+
+        if (words.length % 2 === 0) {
+            // For even number of words, find the word with more characters
+            const wordWithMoreChars = words[middleIndex].length >= words[middleIndex - 1].length ? words[middleIndex] : words[middleIndex - 1];
+            prefix = firstLetter + wordWithMoreChars[0].toUpperCase() + lastLetter;
+        } else {
+            // For odd number of words, use the middle word
+            prefix = firstLetter + middleLetter + lastLetter;
+        }
+    }
+
+    // Fetch or initialize the counter
+    let counter = await Counter.findOne({ name: 'client_code' });
     if (!counter) {
         counter = new Counter({ name: 'client_code', sequence_value: 1 });
     } else {
@@ -54,9 +84,15 @@ async function generateClientCode(name) {
 
     await counter.save();
 
+    // Pad the numeric part with leading zeros if necessary
     const numericPart = counter.sequence_value.toString().padStart(3, '0');
+
+    // Return the concatenated client code
     return `${prefix}${numericPart}`;
 }
+
+
+
 
 // Link a contact to a client
 router.put('/:clientId/linkContact/:contactId', async (req, res) => {

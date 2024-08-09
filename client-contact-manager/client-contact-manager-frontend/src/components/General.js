@@ -9,14 +9,15 @@ const General = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const clientsResponse = await axios.get('http://localhost:5000/clients'); //api route:etch all clients
-                const contactsResponse = await axios.get('http://localhost:5000/contacts'); //api route:fetch all Contacts
+                const clientsResponse = await axios.get('http://localhost:5000/clients');
+                const contactsResponse = await axios.get('http://localhost:5000/contacts');
 
-                setClients(clientsResponse.data);
-                setContacts(contactsResponse.data);
-                setLoading(false);
+                setClients(clientsResponse.data || []); // Ensure clients is an empty array if no data
+                setContacts(contactsResponse.data || []); // Ensure contacts is an empty array if no data
+                setLoading(false); // Set loading to false after data is fetched
             } catch (error) {
                 console.error("There was an error fetching the data!", error);
+                setLoading(false); // Also set loading to false if there's an error
             }
         };
 
